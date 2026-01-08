@@ -84,7 +84,13 @@
     color: #cfd4ff;
   }
 
-  /* Landscape / wide screens: player on the side */
+  /* Loop button oval */
+  #loopBtn {
+    border-radius: 999px;
+    padding: 10px 16px;
+  }
+
+  /* Landscape / wide screens: player on the side + zoomed-out scaling */
   @media (min-width: 900px) and (orientation: landscape) {
     body {
       display: grid;
@@ -93,7 +99,7 @@
       gap: clamp(8px, 1.2vw, 12px);
     }
     .grid {
-      max-width: none;
+      max-width: 720px; /* zoomed-out look like target */
       margin: 0;
     }
     .player {
