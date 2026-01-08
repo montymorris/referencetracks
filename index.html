@@ -79,6 +79,29 @@
   .progress {
     width: 100%;
   }
+  button.active {
+    background: #2f3250;
+    color: #cfd4ff;
+  }
+
+  /* Landscape / wide screens: player on the side */
+  @media (min-width: 900px) and (orientation: landscape) {
+    body {
+      display: grid;
+      grid-template-columns: 1fr 360px;
+      align-items: start;
+    }
+    .grid {
+      max-width: none;
+      margin: 0;
+    }
+    .player {
+      position: sticky;
+      top: 12px;
+      max-width: none;
+      height: fit-content;
+    }
+  }
 </style>
 </head>
 <body>
@@ -153,6 +176,7 @@
 
   loopBtn.onclick = () => {
     audio.loop = !audio.loop;
+    loopBtn.classList.toggle('active', audio.loop);
   };
 
   audio.addEventListener('play', () => {
