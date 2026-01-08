@@ -111,11 +111,23 @@
   const loopBtn = document.getElementById('loopBtn');
   const progress = document.getElementById('progress');
 
+  const titles = [
+    "Go Your Own Way",
+    "It's a Beautiful Day",
+    "Hotel California - 2013 Remaster",
+    "The Power of Love",
+    "You Will Be Found",
+    "Larger Than Life",
+    "Welcome To The Moulin Rouge!",
+    "20khz @-18dbfs Reference",
+    "Bass Test Subwoofer"
+  ];
+
   const tracks = Array.from({ length: 9 }, (_, i) => ({
     id: i + 1,
     img: `track${i + 1}.jpg`,
     src: `track${i + 1}.mp3`,
-    title: `Track ${i + 1}`
+    title: titles[i]
   }));
 
   tracks.forEach(t => {
