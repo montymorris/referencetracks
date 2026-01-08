@@ -79,15 +79,19 @@
   .progress {
     width: 100%;
   }
+
+  /* Buttons */
+  button {
+    background: #2a2c34;
+    color: var(--text);
+    border: none;
+    border-radius: 999px;
+    padding: 10px 16px;
+    cursor: pointer;
+  }
   button.active {
     background: #2f3250;
     color: #cfd4ff;
-  }
-
-  /* Loop button oval */
-  #loopBtn {
-    border-radius: 999px;
-    padding: 10px 16px;
   }
 
   /* Landscape / wide screens: player on the side + zoomed-out scaling */
@@ -99,7 +103,7 @@
       gap: clamp(8px, 1.2vw, 12px);
     }
     .grid {
-      max-width: 720px; /* zoomed-out look like target */
+      max-width: 720px;
       margin: 0;
     }
     .player {
@@ -178,32 +182,4 @@
 
   playPause.onclick = () => {
     if (audio.paused) audio.play();
-    else audio.pause();
-  };
-
-  loopBtn.onclick = () => {
-    audio.loop = !audio.loop;
-    loopBtn.classList.toggle('active', audio.loop);
-  };
-
-  audio.addEventListener('play', () => {
-    playPause.textContent = 'Pause';
-  });
-
-  audio.addEventListener('pause', () => {
-    playPause.textContent = 'Play';
-  });
-
-  audio.addEventListener('timeupdate', () => {
-    if (!isFinite(audio.duration)) return;
-    progress.value = (audio.currentTime / audio.duration) * 100 || 0;
-  });
-
-  progress.addEventListener('input', () => {
-    if (!isFinite(audio.duration)) return;
-    audio.currentTime = (progress.value / 100) * audio.duration;
-  });
-</script>
-
-</body>
-</html>
+    else
