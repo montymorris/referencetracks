@@ -76,6 +76,9 @@
     border-radius: 10px;
     object-fit: cover;
   }
+  .progress {
+    width: 100%;
+  }
 </style>
 </head>
 <body>
@@ -85,7 +88,10 @@
 <div class="player hidden" id="player">
   <div class="player-card">
     <img class="cover" id="playerCover" src="" alt="">
-    <div id="playerTitle"></div>
+    <div>
+      <div id="playerTitle"></div>
+      <input type="range" id="progress" class="progress" min="0" max="100" value="0">
+    </div>
     <div>
       <button id="playPause">Play</button>
       <button id="loopBtn">Loop</button>
@@ -103,6 +109,7 @@
   const playerTitle = document.getElementById('playerTitle');
   const playPause = document.getElementById('playPause');
   const loopBtn = document.getElementById('loopBtn');
+  const progress = document.getElementById('progress');
 
   const tracks = Array.from({ length: 9 }, (_, i) => ({
     id: i + 1,
@@ -116,6 +123,8 @@
     tile.className = 'tile';
     tile.innerHTML = `<img src="${t.img}" width="600" height="600" alt="${t.title}">`;
     tile.addEventListener('click', () => {
+      audio.pause();
+      audio.currentTime = 0;
       playerCover.src = t.img;
       playerTitle.textContent = t.title;
       audio.src = t.src;
@@ -126,11 +135,31 @@
   });
 
   playPause.onclick = () => {
-    if (audio.paused) audio.play(); else audio.pause();
+    if (audio.paused) audio.play();
+    else audio.pause();
   };
+
   loopBtn.onclick = () => {
     audio.loop = !audio.loop;
   };
+
+  audio.addEventListener('play', () => {
+    playPause.textContent = 'Pause';
+  });
+
+  audio.addEventListener('pause', () => {
+    playPause.textContent = 'Play';
+  });
+
+  audio.addEventListener('timeupdate', () => {
+    if (!isFinite(audio.duration)) return;
+    progress.value = (audio.currentTime / audio.duration) * 100 || 0;
+  });
+
+  progress.addEventListener('input', () => {
+    if (!isFinite(audio.duration)) return;
+    audio.currentTime = (progress.value / 100) * audio.duration;
+  });
 </script>
 
 </body>
