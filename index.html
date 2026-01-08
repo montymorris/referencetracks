@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Monty Morris Reference Tracks</title>
+<title>Album Grid Player</title>
 <style>
   :root {
     --bg: #0f0f12;
@@ -30,15 +30,15 @@
   .grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
-    padding: 12px;
-    max-width: 900px;
+    gap: clamp(8px, 1.2vw, 12px);
+    padding: clamp(8px, 1.2vw, 12px);
+    max-width: min(95vw, 900px);
     width: 100%;
     margin: 0 auto;
   }
   .tile {
     background: var(--card);
-    border-radius: 14px;
+    border-radius: clamp(10px, 1.2vw, 14px);
     overflow: hidden;
     position: relative;
     width: 100%;
@@ -55,25 +55,25 @@
 
   /* Player */
   .player {
-    max-width: 900px;
+    max-width: min(95vw, 900px);
     margin: 0 auto;
     width: 100%;
-    padding: 12px;
+    padding: clamp(8px, 1.2vw, 12px);
   }
   .player.hidden { display: none; }
   .player-card {
     background: var(--card);
-    border-radius: 16px;
-    padding: 12px;
+    border-radius: clamp(12px, 1.5vw, 16px);
+    padding: clamp(8px, 1.2vw, 12px);
     display: grid;
     grid-template-columns: auto 1fr auto;
-    gap: 12px;
+    gap: clamp(8px, 1.2vw, 12px);
     align-items: center;
   }
   .cover {
-    width: 56px;
-    height: 56px;
-    border-radius: 10px;
+    width: clamp(44px, 6vw, 56px);
+    height: clamp(44px, 6vw, 56px);
+    border-radius: clamp(8px, 1vw, 10px);
     object-fit: cover;
   }
   .progress {
@@ -88,8 +88,9 @@
   @media (min-width: 900px) and (orientation: landscape) {
     body {
       display: grid;
-      grid-template-columns: 1fr 360px;
+      grid-template-columns: minmax(0, 1fr) minmax(280px, 360px);
       align-items: start;
+      gap: clamp(8px, 1.2vw, 12px);
     }
     .grid {
       max-width: none;
@@ -97,7 +98,7 @@
     }
     .player {
       position: sticky;
-      top: 12px;
+      top: clamp(8px, 1.2vw, 12px);
       max-width: none;
       height: fit-content;
     }
