@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Album Grid Player</title>
+<style>
+  :root {
+    --bg: #0f0f12;
+    --card: #1a1b20;
+    --text: #e8e8ea;
+    --muted: #9aa0a6;
+    --accent: #6b7cff;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  header {
+    padding: 16px;
+    text-align: center;
+    color: var(--muted);
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    padding: 12px;
+    max-width: 900px;
+    width: 100%;
+    margin: 0 auto;
+  }
+  @media (max-width: 700px) {
+    .grid { grid-template-columns: repeat(3, 1fr); }
+  }
+  .tile {
+    background: var(--card);
+    border-radius: 14px;
+    overflow: hidden;
+    position: relative;
+    aspect-ratio: 1 / 1;
+    cursor: pointer;
+    box-shadow: 0 6px 20px rgba(0,0,0,.25);
+    transition: transform .12s ease, box-shadow .12s ease;
+  }
+  .tile:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 10px 28px rgba(0,0,0,.35);
+  }
+  .tile img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .tile .overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(0,0,0,.55), rgba(0,0,0,0));
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding: 10px;
+    opacity: 0;
+    transition: opacity .12s ease;
+  }
+  .tile:hover .overlay { opacity: 1; }
+  .overlay span {
+    background: rgba(0,0,0,.6);
+    border-radius: 999px;
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+
+  .player {
+    max-width: 900px;
+    margin: 0 auto;
+    width: 100%;
+    padding: 12px;
+  }
+  .player-card {
+    background: var(--card);
+    border-radius: 16px;
+    padding: 12px;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 12px;
+    align-items: center;
+    box-shadow: 0 10px 28px rgba(0,0,0,.35);
+  }
+  .player.hidden { display: none; }
+  .cover {
+    width: 56px;
+    height: 56px;
+    border-radius: 10px;
+    object-fit: cover;
+    background: #000;
+  }
+  .meta {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .title {
+    font-weight: 600;
+    font-size: 14px;
+  }
+  .time {
+    color: var(--muted);
+    font-size: 12px;
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .progress {
+    width: 100%;
+    appearance: none;
+    height: 6px;
+    border-radius: 999px;
+    background: #2a2c34;
+    outline: none;
+  }
+  .progress::-webkit-slider-thumb {
+    appearance: none;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--accent);
+    cursor: pointer;
+  }
+
+  .controls {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  button {
+    background: #2a2c34;
+    color: var(--text);
+    border: none;
+    border-radius: 10px;
+    padding: 10px 12px;
+    cursor: pointer;
+    font-size: 14px;
+  }
+  button.primary {
+    background: var(--accent);
+    color: #0b0d14;
+    font-weight: 600;
+  }
+  button.active {
+    outline: 2px solid var(--accent);
+  }
+</style>
+</head>
+<body>
+<header>Album Grid Player</header>
+
+<div class="grid" id="grid"></div>
+
+<div class="player hidden" id="player">
+  <div class="player-card">
+    <img class="cover" id="playerCover" src="" alt="">
+    <div class="meta">
+      <div class="title" id="playerTitle">—</div>
+      <input type="range" class="progress" id="progress" min="0" max="100" value="0">
+      <div class="time">
+        <span id="currentTime">0:00</span>
+        <span id="duration">0:00</span>
+      </div>
+    </div>
+    <div class="controls">
+      <button id="playPause" class="primary">Play</button>
+      <button id="loopBtn">Loop</button>
+    </div>
+  </div>
+</div>
+
+<audio id="audio"></audio>
+
+<script>
+  const grid = document.getElementById('grid');
+  const audio = document.getElementById('audio');
+  const player = document.getElementById('player');
+  const playerCover = document.getElementById('playerCover');
+  const playerTitle = document.getElementById('playerTitle');
+  const playPause = document.getElementById('playPause');
+  const loopBtn = document.getElementById('loopBtn');
+  const progress = document.getElementById('progress');
+  const currentTimeEl = document.getElementById('currentTime');
+  const durationEl = document.getElementById('duration');
+
+  const tracks = Array.from({ length: 9 }, (_, i) => ({
+    id: i + 1,
+    img: `track${i + 1}.jpg`,
+    src: `track${i + 1}.mp3`,
+    title: `Track ${i + 1}`
+  }));
+
+  function formatTime(s) {
+    if (!isFinite(s)) return '0:00';
+    const m = Math.floor(s / 60);
+    const sec = Math.floor(s % 60).toString().padStart(2, '0');
+    return `${m}:${sec}`;
+  }
+
+  // Build grid
+  tracks.forEach(t => {
+    const tile = document.createElement('div');
+    tile.className = 'tile';
+    tile.innerHTML = `
+      <img src="${t.img}" alt="${t.title}">
+      <div class="overlay"><span>${t.title}</span></div>
+    `;
+    tile.addEventListener('click', () => loadAndPlay(t));
+    grid.appendChild(tile);
+  });
+
+  let currentTrack = null;
+
+  function loadAndPlay(track) {
+    currentTrack = track;
+    playerCover.src = track.img;
+    playerTitle.textContent = track.title;
+    audio.src = track.src;
+    audio.loop = loopBtn.classList.contains('active');
+    player.classList.remove('hidden');
+    audio.play();
+  }
+
+  playPause.addEventListener('click', () => {
+    if (audio.paused) audio.play();
+    else audio.pause();
+  });
+
+  loopBtn.addEventListener('click', () => {
+    audio.loop = !audio.loop;
+    loopBtn.classList.toggle('active', audio.loop);
+  });
+
+  audio.addEventListener('play', () => {
+    playPause.textContent = 'Pause';
+  });
+  audio.addEventListener('pause', () => {
+    playPause.textContent = 'Play';
+  });
+
+  audio.addEventListener('loadedmetadata', () => {
+    durationEl.textContent = formatTime(audio.duration);
+  });
+
+  audio.addEventListener('timeupdate', () => {
+    if (!isFinite(audio.duration)) return;
+    const p = (audio.currentTime / audio.duration) * 100;
+    progress.value = p || 0;
+    currentTimeEl.textContent = formatTime(audio.currentTime);
+  });
+
+  progress.addEventListener('input', () => {
+    if (!isFinite(audio.duration)) return;
+    audio.currentTime = (progress.value / 100) * audio.duration;
+  });
+</script>
+</body>
+</html>
